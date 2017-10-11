@@ -1,12 +1,14 @@
-import urllib.request
-import re
-import operator
+import os
 import datetime
+import operator
+import re
+import urllib.request
+
 from bs4 import BeautifulSoup
 from prettytable import PrettyTable
 
-from classes import Webpage_content_lbc
-from send_email import send_html_email
+from _templates_classes.classes import Webpage_content_lbc
+from _templates_classes.send_email import send_html_email
 
 
 def find_matching_link(my_url, my_link_regex, my_output_list):
@@ -58,7 +60,6 @@ def match_criteria_string(input_dict, my_criteria, my_target_string, start_with 
             return False
 
 
-
 def match_criteria_int(input_dict, my_criteria,  my_target_int, comparison = '<='):
     """
         Check if my_criteria is below or equal my_target_int. If yes return True else return False.
@@ -108,14 +109,15 @@ NB_LINKS_TO_RETRIEVE = 5 # get last x ads matching criterias
 # email criterias
 TO_ADDR = 'constant.pierre@gmail.com'
 CC_ADDR = None
-SUBJECT = 'bot_lbc'
-HTML_TEMPLATE = r'C:\Users\CONSTANT_P\Desktop\_to_save_pc\9_learning\1612_treehouse\bot_LBC\email_template.html'
+SUBJECT = 'bot_lbc'+datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
+HTML_TEMPLATE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '_templates_classes', 'email_template.html')
 
 
 # start
 my_url = MY_START_URL
 
 if __name__ == '__main__':
+
 # while target nb returned is not matched
     matched_links = []
     output_tables = []
