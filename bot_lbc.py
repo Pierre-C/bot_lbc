@@ -109,31 +109,31 @@ NB_LINKS_TO_RETRIEVE = 5 # get last x ads matching criterias
 # email criterias
 TO_ADDR = 'constant.pierre@gmail.com'
 CC_ADDR = None
-SUBJECT = 'bot_lbc'+datetime.datetime.now().strftime("%d-%m-%Y %H:%M")
+SUBJECT = 'bot_lbc'
 HTML_TEMPLATE = os.path.join(os.path.dirname(os.path.realpath(__file__)), '_templates_classes', 'email_template.html')
 
+def launch_script():
+    """wrapper function for html embedding"""
 
-# start
-my_url = MY_START_URL
+    # while target nb returned is not matched
+    my_url = MY_START_URL
 
-if __name__ == '__main__':
-
-# while target nb returned is not matched
     matched_links = []
     output_tables = []
     output_descriptions = []
- # from mainpage
+    # from mainpage
     while True:
 
-         # get list links for ads
+        # get list links for ads
         list_of_links = []
         find_matching_link(my_url, MY_LINK_REGEX, list_of_links)
-        list_of_links = [link.decode("ISO-8859-16") for link in list_of_links] # list contains byte strings*
-        list_of_links = ['https://'+link for link in list_of_links]
+        list_of_links = [link.decode("ISO-8859-16") for link in list_of_links]  # list contains byte strings*
+        list_of_links = ['https://' + link for link in list_of_links]
 
         # loop over ads, and get dictionnary
         for link in list_of_links:
-            kwargs_input_lbc = {'url': link, 'tag_to_retrieve': HTML_TAG_TO_RETRIEVE, 'html_subset': ARGS_HTML_SUBST_TAGS}
+            kwargs_input_lbc = {'url': link, 'tag_to_retrieve': HTML_TAG_TO_RETRIEVE,
+                                'html_subset': ARGS_HTML_SUBST_TAGS}
             my_webpage_lbc = Webpage_content_lbc(**kwargs_input_lbc)
             ad_dict = my_webpage_lbc.output_dict
 
@@ -145,14 +145,14 @@ if __name__ == '__main__':
                 # print table
                 print('\n')
                 my_table = PrettyTable()
-                my_table.field_names= ["Key", "Value"]
+                my_table.field_names = ["Key", "Value"]
                 list_attributes = [item for item in ad_dict.items()]
-                for item in list_attributes[:-1]: # to exclude description, to long to be sent by email
+                for item in list_attributes[:-1]:  # to exclude description, to long to be sent by email
                     my_table.add_row(item)
                 my_table.add_row(["URL", link])
                 my_table.align = "l"
                 output_tables.append(my_table)
-                output_descriptions.append(list_attributes[-1:][0][1]) # get description value only
+                output_descriptions.append(list_attributes[-1:][0][1])  # get description value only
                 print(my_table)
                 print(list_attributes[-1:])
 
@@ -162,19 +162,21 @@ if __name__ == '__main__':
                     main_message = ''
                     for table in output_tables:
                         main_message = main_message + ''.join(table.get_html_string())
-                        main_message = main_message + '<br>' + '<p>' + '<b>'+'Description :'+'</b>'+'</p>'
-                        main_message = main_message + '<p>' + ''.join(output_descriptions[output_tables.index(table)])+'</p>'
-                        main_message = main_message + '<br>'*2 + '<hr>'
-
+                        main_message = main_message + '<br>' + '<p>' + '<b>' + 'Description :' + '</b>' + '</p>'
+                        main_message = main_message + '<p>' + ''.join(
+                            output_descriptions[output_tables.index(table)]) + '</p>'
+                        main_message = main_message + '<br>' * 2 + '<hr>'
 
                     send_html_email(TO_ADDR,
-                                    SUBJECT+' | '+datetime.datetime.now().strftime("%d %B %y - %H:%M"),
+                                    SUBJECT + ' | ' + datetime.datetime.now().strftime("%d %B %y - %H:%M"),
                                     HTML_TEMPLATE,
                                     main_message,
                                     CC_ADDR)
                     exit()
 
-
         # move to next mainpage if target number of ads not reached
         my_url = 'https:' + get_next_page_url(my_url, 'footer', {'class': 'pagination clearfix'})
 
+
+if __name__ == '__main__':
+    launch_script()
